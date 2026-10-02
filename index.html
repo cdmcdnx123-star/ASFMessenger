@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>ASF Messenger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#0e1116;--p:#161b22;--p2:#1f2630;--tx:#e8edf3;--mu:#8b97a6;--ac:#6c5ce7;--ac2:#00d2c6;--me:#4a3fc2;--bd:#262e39;box-sizing:border-box}
+:root:not([data-theme=dark])[data-t=light],:root[data-t=light]{--bg:#f3f5f9;--p:#fff;--p2:#eef1f6;--tx:#161b22;--mu:#5d6b7c;--me:#dcd8ff;--bd:#dde3ea}
+*{box-sizing:border-box;margin:0}html,body{height:100%}@supports(height:100dvh){body{height:100dvh}}
+body{font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;border-radius:10px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--tx);background:var(--p2);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;width:100%}
+.btn{background:linear-gradient(135deg,var(--ac),#8e7bff);color:#fff;padding:12px 18px;font-weight:600;width:100%;border-radius:12px}
+.ic{width:40px;height:40px;display:inline-grid;place-items:center;font-size:18px}.ic:hover{background:var(--p2)}
+#auth{height:100%;display:grid;place-items:center;padding:16px;overflow:auto}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:20px;padding:28px;width:100%;max-width:400px;display:grid;gap:14px;animation:up .3s}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+.app{display:flex;height:100%}@supports(height:100dvh){.app{height:100dvh}}
+.side{min-height:0;width:360px;max-width:100%;background:var(--p);border-inline-end:1px solid var(--bd);display:flex;flex-direction:column;flex:none}
+.sh{padding:14px;display:grid;gap:10px}.sh .row{display:flex;justify-content:space-between;align-items:center}
+.pane{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.it{display:flex;gap:12px;padding:11px 14px;align-items:center;width:100%;text-align:start;border-radius:0}
+.it:hover,.it.on{background:var(--p2)}.it .m{flex:1;min-width:0}.it .m b,.it .m small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+small{color:var(--mu)}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;position:relative}
+.av.on::after{content:"";position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2ecc71;border:2px solid var(--p)}
+.av.ring{outline:3px solid var(--ac2);outline-offset:2px}.av.seen{outline-color:var(--mu)}
+.badge{background:var(--ac2);color:#032;border-radius:99px;font-size:12px;font-weight:700;padding:1px 7px}
+.nav{display:flex;border-top:1px solid var(--bd);padding-bottom:2px}.nav button{flex:1;padding:9px 0;font-size:12px;color:var(--mu);border-radius:0}.nav button span{display:block;font-size:20px}.nav .on{color:var(--ac2)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);position:relative}
+.empty{margin:auto;text-align:center;color:var(--mu);display:grid;gap:10px;justify-items:center;padding:20px}
+.ch{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--p);border-bottom:1px solid var(--bd)}.ch .m{flex:1;min-width:0}
+.msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth}
+.sep{align-self:center;background:var(--p2);color:var(--mu);font-size:12px;padding:3px 12px;border-radius:99px;margin:6px}
+.b{max-width:min(75%,520px);padding:8px 12px;border-radius:16px;background:var(--p);border:1px solid var(--bd);align-self:flex-start;word-break:break-word;animation:up .2s;cursor:pointer}
+.b.me{align-self:flex-end;background:var(--me);border-color:transparent}
+.b i{display:block;font-size:11px;color:var(--mu);text-align:end;font-style:normal}.b img,.b video{max-width:100%;border-radius:10px;display:block}
+.act{display:flex;gap:2px;margin-top:4px}.act button{padding:3px 8px;font-size:13px;background:var(--p2)}
+.rx{font-size:13px;margin-top:2px}
+.typing span{display:inline-block;width:6px;height:6px;background:var(--mu);border-radius:50%;margin:0 2px;animation:bl 1s infinite}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bl{50%{opacity:.2}}
+.comp{display:flex;gap:6px;padding:10px;background:var(--p);border-top:1px solid var(--bd);align-items:center}
+.emo{display:flex;flex-wrap:wrap;gap:2px;padding:6px 10px;background:var(--p);border-top:1px solid var(--bd)}.emo button{font-size:22px;padding:2px 6px}
+.ov{position:fixed;inset:0;z-index:20;background:linear-gradient(#1b1442,#07090d);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:up .25s;padding:20px;text-align:center}
+.ov .av{width:110px;height:110px;font-size:40px}.ov.pulse .av{animation:pl 1.4s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 #6c5ce799}100%{box-shadow:0 0 0 40px #0000}}
+.ctr{display:flex;gap:16px;margin-top:20px}.ctr button{width:60px;height:60px;border-radius:50%;background:#ffffff22;font-size:24px}.ctr .end{background:#e74c3c}.ctr .off{background:#fff;color:#000}
+#self{position:absolute;right:16px;top:70px;width:110px;height:150px;object-fit:cover;border-radius:14px;background:#000;border:2px solid #fff4}
+.set{padding:14px;display:grid;gap:12px}.row2{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--p2);padding:12px 14px;border-radius:12px}
+.row2 select{width:auto;max-width:55%}.sw{width:44px;height:24px;border-radius:99px;background:var(--bd);position:relative;flex:none}.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.sw.on{background:var(--ac)}.sw.on::after{left:23px}
+.net{background:#e67e22;color:#fff;text-align:center;font-size:13px;padding:4px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:99px;z-index:50;font-size:14px}
+.bar{height:3px;background:#fff4;width:90%;border-radius:2px}.bar i{display:block;height:100%;background:#fff;width:0;transition:width 5s linear}
+[dir=rtl] .main .ic.back{transform:scaleX(-1)}
+.back{display:none}
+[hidden]{display:none!important}
+.nav em{display:block;font-style:normal;font-size:12px}
+.nb{position:absolute;top:4px;background:#2ecc71;color:#05260f;border-radius:99px;font-size:11px;padding:0 6px;margin-inline-start:14px;font-weight:700}
+.rav{display:none!important}
+.srch{display:flex;align-items:center;gap:8px;background:var(--p2);border-radius:99px;padding:0 16px}.srch input{border:0;background:transparent;padding:11px 0;border-radius:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}.chip{border:1px solid var(--bd);border-radius:99px;padding:6px 14px;font-size:14px;white-space:nowrap;color:var(--mu)}.chip.on{background:#2ecc7126;color:#2ecc71;border-color:transparent}
+#ttl{font-size:22px}.nc{background:var(--tx);color:var(--bg);border-radius:50%}
+.qt{display:block;border-inline-start:3px solid var(--ac2);background:#0003;border-radius:8px;padding:5px 8px;margin-bottom:4px;font-size:13px;text-align:start}.qt b{display:block;color:var(--ac2)}.qt span{display:block;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b i{float:inline-end;margin-inline-start:12px;margin-top:6px}.act{clear:both}
+.comp{margin:8px 12px 12px;border:1px solid var(--bd);border-radius:30px;padding:4px 8px}.comp #in{background:transparent;border:0}
+.av.ring{outline:3px solid #2ecc71;outline-offset:2px}.av.seen{outline-color:var(--mu)}
+.badge{background:#2ecc71;color:#05260f}
+@media(min-width:801px){.nav{flex-direction:column;width:64px;flex:none;border-top:0;border-inline-end:1px solid var(--bd);background:var(--p);align-items:center;padding:12px 0;gap:6px}.nav button[data-t]{flex:none;width:46px;height:46px;padding:0;border-radius:14px;position:relative}.nav em{display:none}.nav button span{font-size:22px}.nav button.on{background:var(--p2)}.nav button[data-t=settings]{margin-top:auto}.rav{display:block!important;padding:0}.rav .av{width:36px;height:36px;font-size:14px}.nb{top:2px;right:2px;margin:0}}
+@media(max-width:800px){.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--p);padding-bottom:calc(2px + env(safe-area-inset-bottom,0px))}.pane{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}}
+
+:root[data-t=black]{--bg:#000;--p:#000;--p2:#141414;--tx:#fff;--mu:#a0a0a0;--me:#2b2b2b;--bd:#262626}
+:root[data-t=white]{--bg:#fff;--p:#fff;--p2:#f1f3f5;--tx:#000;--mu:#5f6368;--me:#e7e3ff;--bd:#e3e6ea}
+:root[data-t=ocean]{--bg:#06141f;--p:#0b2233;--p2:#12304a;--ac:#1e90ff;--ac2:#4dd0e1;--me:#0f4c81;--bd:#1b3b57}
+:root[data-t=forest]{--bg:#0a140e;--p:#12201a;--p2:#1a2e24;--ac:#2ecc71;--ac2:#a3e635;--me:#1f6b3f;--bd:#23382c}
+:root[data-t=sunset]{--bg:#1a0e10;--p:#26151a;--p2:#341d24;--ac:#ff7043;--ac2:#ffca28;--me:#8a3b24;--bd:#4a2a30}
+:root[data-t=rose]{--bg:#1c0f18;--p:#2a1624;--p2:#391d31;--ac:#e84393;--ac2:#fd79a8;--me:#8e2a5f;--bd:#4d2842}
+.msgs{background-image:var(--wp,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' fill='none' stroke='%23808080' stroke-opacity='.16' stroke-width='1.5'%3E%3Ccircle cx='25' cy='25' r='9'/%3E%3Cpath d='M85 20l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z'/%3E%3Cpath d='M30 95c-8-6-13-10-13-16a8 8 0 0 1 13-5 8 8 0 0 1 13 5c0 6-5 10-13 16z'/%3E%3Crect x='88' y='85' width='30' height='22' rx='8'/%3E%3Cpath d='M100 107l-4 9 11-9'/%3E%3C/svg%3E"));background-size:var(--wps,140px);background-position:center}
+@media(max-width:800px){.side{width:100%;border:0}.main{position:fixed;inset:0;z-index:10;transform:translateX(100%);transition:transform .25s;padding-top:env(safe-area-inset-top,0px)}[dir=rtl] .main{transform:translateX(-100%)}.app.open .main{transform:none}.back{display:inline-grid}.b{max-width:85%}}
+@media(min-width:1200px){.side{width:400px}}
+@media(prefers-color-scheme:dark){:root:not([data-t]){--bg:#0e1116}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 18px;font-weight:600;border-radius:12px;background:#fff;color:#1f1f1f;border:1px solid #dadce0}
+.or{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--bd)}
+#gw{display:grid;gap:6px;justify-items:center}
+</style></head><body>
+<div id="root"></div>
+<script>
+const L={
+en:{google:"Continue with Google",chats:"Chats",calls:"Calls",status:"Status",settings:"Settings",search:"Search",type:"Type a message",cont:"Continue",verify:"Verify",name:"Display name",num:"Your ASF number",lang:"Language",theme:"Dark mode",logout:"Log out",online:"online",typing:"typing…",id:"Email or phone",otp:"Enter the 6-digit code",start:"Start messaging",addst:"Add status",mine:"My status",call:"Calling…",conn:"Connected",priv:"Read receipts"},
+ur:{google:"گوگل کے ساتھ جاری رکھیں",chats:"چیٹس",calls:"کالز",status:"اسٹیٹس",settings:"سیٹنگز",search:"تلاش کریں",type:"پیغام لکھیں",cont:"جاری رکھیں",verify:"تصدیق کریں",name:"آپ کا نام",num:"آپ کا ASF نمبر",lang:"زبان",theme:"ڈارک موڈ",logout:"لاگ آؤٹ",online:"آن لائن",typing:"لکھ رہا ہے…",id:"ای میل یا فون",otp:"6 ہندسوں کا کوڈ درج کریں",start:"پیغام رسانی شروع کریں",addst:"اسٹیٹس لگائیں",mine:"میرا اسٹیٹس",call:"کال ہو رہی ہے…",conn:"جڑ گئی",priv:"ریڈ رسیدیں"},
+hi:{google:"Google के साथ जारी रखें",chats:"चैट",calls:"कॉल",status:"स्टेटस",settings:"सेटिंग्स",search:"खोजें",type:"संदेश लिखें",cont:"आगे बढ़ें",verify:"सत्यापित करें",name:"आपका नाम",num:"आपका ASF नंबर",lang:"भाषा",theme:"डार्क मोड",logout:"लॉग आउट",online:"ऑनलाइन",typing:"लिख रहा है…",id:"ईमेल या फ़ोन",otp:"6 अंकों का कोड डालें",start:"मैसेज करना शुरू करें",addst:"स्टेटस जोड़ें",mine:"मेरा स्टेटस",call:"कॉल हो रही है…",conn:"जुड़ गया",priv:"रीड रिसीट"},
+ar:{google:"المتابعة باستخدام Google",chats:"المحادثات",calls:"المكالمات",status:"الحالة",settings:"الإعدادات",search:"بحث",type:"اكتب رسالة",cont:"متابعة",verify:"تحقق",name:"الاسم",num:"رقم ASF الخاص بك",lang:"اللغة",theme:"الوضع الداكن",logout:"تسجيل الخروج",online:"متصل",typing:"يكتب…",id:"البريد أو الهاتف",otp:"أدخل الرمز المكون من 6 أرقام",start:"ابدأ المراسلة",addst:"أضف حالة",mine:"حالتي",call:"جارٍ الاتصال…",conn:"متصل",priv:"إشعارات القراءة"},
+bn:{chats:"চ্যাট",calls:"কল",status:"স্ট্যাটাস",settings:"সেটিংস",search:"খুঁজুন",type:"বার্তা লিখুন",cont:"চালিয়ে যান",verify:"যাচাই করুন",name:"আপনার নাম",num:"আপনার ASF নম্বর",lang:"ভাষা",theme:"ডার্ক মোড",logout:"লগ আউট",online:"অনলাইন",typing:"লিখছে…",id:"ইমেইল বা ফোন",otp:"৬ সংখ্যার কোড দিন",start:"মেসেজিং শুরু করুন",addst:"স্ট্যাটাস দিন",mine:"আমার স্ট্যাটাস",call:"কল হচ্ছে…",conn:"সংযুক্ত",priv:"রিড রিসিপ্ট"},
+es:{chats:"Chats",calls:"Llamadas",status:"Estados",settings:"Ajustes",search:"Buscar",type:"Escribe un mensaje",cont:"Continuar",verify:"Verificar",name:"Tu nombre",num:"Tu número ASF",lang:"Idioma",theme:"Modo oscuro",logout:"Cerrar sesión",online:"en línea",typing:"escribiendo…",id:"Correo o teléfono",otp:"Ingresa el código de 6 dígitos",start:"Empezar a chatear",addst:"Añadir estado",mine:"Mi estado",call:"Llamando…",conn:"Conectado",priv:"Confirmación de lectura"},
+fr:{chats:"Discussions",calls:"Appels",status:"Statuts",settings:"Réglages",search:"Rechercher",type:"Écrire un message",cont:"Continuer",verify:"Vérifier",name:"Votre nom",num:"Votre numéro ASF",lang:"Langue",theme:"Mode sombre",logout:"Déconnexion",online:"en ligne",typing:"écrit…",id:"E-mail ou téléphone",otp:"Saisissez le code à 6 chiffres",start:"Commencer",addst:"Ajouter un statut",mine:"Mon statut",call:"Appel…",conn:"Connecté",priv:"Accusés de lecture"},
+tr:{chats:"Sohbetler",calls:"Aramalar",status:"Durum",settings:"Ayarlar",search:"Ara",type:"Mesaj yaz",cont:"Devam",verify:"Doğrula",name:"Adınız",num:"ASF numaranız",lang:"Dil",theme:"Karanlık mod",logout:"Çıkış yap",online:"çevrimiçi",typing:"yazıyor…",id:"E-posta veya telefon",otp:"6 haneli kodu girin",start:"Mesajlaşmaya başla",addst:"Durum ekle",mine:"Durumum",call:"Aranıyor…",conn:"Bağlandı",priv:"Okundu bilgisi"},
+zh:{chats:"聊天",calls:"通话",status:"动态",settings:"设置",search:"搜索",type:"输入消息",cont:"继续",verify:"验证",name:"昵称",num:"你的 ASF 号码",lang:"语言",theme:"深色模式",logout:"退出登录",online:"在线",typing:"正在输入…",id:"邮箱或手机",otp:"输入6位验证码",start:"开始聊天",addst:"发布动态",mine:"我的动态",call:"呼叫中…",conn:"已接通",priv:"已读回执"},
+ru:{chats:"Чаты",calls:"Звонки",status:"Статусы",settings:"Настройки",search:"Поиск",type:"Введите сообщение",cont:"Продолжить",verify:"Подтвердить",name:"Ваше имя",num:"Ваш номер ASF",lang:"Язык",theme:"Тёмная тема",logout:"Выйти",online:"в сети",typing:"печатает…",id:"Почта или телефон",otp:"Введите 6-значный код",start:"Начать общение",addst:"Добавить статус",mine:"Мой статус",call:"Вызов…",conn:"Соединено",priv:"Отчёты о прочтении"}};
+const LN={en:"English",ur:"اردو (Urdu)",hi:"हिन्दी (Hindi)",ar:"العربية (Arabic)",bn:"বাংলা (Bengali)",es:"Español",fr:"Français",tr:"Türkçe",zh:"中文",ru:"Русский"};
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S;try{S=JSON.parse(localStorage.getItem("asf")||"null")}catch(e){}
+const col=["#6c5ce7","#e17055","#00b894","#0984e3","#d63031","#e84393"];
+const seed=()=>({lang:(navigator.language||"en").slice(0,2) in L?(navigator.language||"en").slice(0,2):"en",theme:"dark",user:null,rr:true,
+chats:[],
+sts:[],mine:[],
+calls:[]});
+if(!S)S=seed();
+const save=()=>{try{localStorage.setItem("asf",JSON.stringify(S))}catch(e){}};
+if(!S.v2){S.v2=1}
+if(!S.v3){S.v3=1;if(!S.chats.find(x=>x.ai))S.chats.push({id:99,name:"ASF AI",ai:1,on:1,unread:0,msgs:[{t:"Assalam o Alaikum! Main ASF AI hoon 🤖 Mujh se kuch bhi poochein.",me:0,ts:Date.now()}]});save()}
+if(!S.v4){S.v4=1;S.chats=(S.chats||[]).filter(x=>x.ai);S.chats.forEach(x=>{x.msgs=[{t:"Assalam o Alaikum! Main ASF AI hoon. Mujh se kuch bhi poochein.",me:0,ts:Date.now()}];x.unread=0});save()}
+if(!S.v5){S.v5=1;S.sts=[];S.mine=[];S.calls=[];S.chats=(S.chats||[]).filter(x=>x.ai);S.chats.forEach(x=>{x.msgs=[{t:"Assalam o Alaikum! Main ASF AI hoon. Mujh se kuch bhi poochein.",me:0,ts:Date.now()}];x.unread=0});save()}
+const t=k=>(L[S.lang]||L.en)[k]||L.en[k];
+const VM={};let rev=false,msq="",rp=null,flt="all";const muted=c=>c.mute&&c.mute>Date.now();let tab="chats",cur=null,q="",stream=null,rec=null,toastT;
+const ini=n=>n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const av=(n,i,x="")=>`<div class="av ${x}" style="background:${col[i%6]}" aria-hidden="true">${esc(ini(n))}</div>`;
+const tm=ts=>new Date(ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+const logo=s=>`<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6c5ce7"/><stop offset="1" stop-color="#00d2c6"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#g)"/><path d="M24 10c-7.7 0-14 5.4-14 12.2 0 3.5 1.7 6.6 4.4 8.8L13 37l6.6-3c1.4.4 2.9.5 4.4.5 7.7 0 14-5.400 14-12.200S31.700 10 24 10z" fill="#fff"/><path d="M18.500 27l5.500-11 5.500 11M20.500 23.500h7" stroke="#6c5ce7" stroke-width="2.400" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ailogo=s=>`<svg width="${s}" height="${s}" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="ga" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff7a59"/><stop offset="1" stop-color="#8e44ff"/></linearGradient></defs><circle cx="24" cy="24" r="24" fill="url(#ga)"/><path d="M24 8c1.2 8.200 4.800 11.800 13 13-8.200 1.200-11.800 4.800-13 13-1.200-8.200-4.800-11.800-13-13 8.200-1.200 11.800-4.800 13-13z" fill="#fff"/><circle cx="36" cy="12" r="2.500" fill="#fff"/><circle cx="12" cy="36" r="2" fill="#fff" fill-opacity=".8"/></svg>`;
+function toast(m){clearTimeout(toastT);let e=$(".toast");if(e)e.remove();document.body.insertAdjacentHTML("beforeend",`<div class="toast" role="status">${esc(m)}</div>`);toastT=setTimeout(()=>{let e=$(".toast");e&&e.remove()},2500)}
+function lsel(){return `<select id="lg" aria-label="Language">${Object.keys(LN).map(k=>`<option value="${k}" ${k==S.lang?"selected":""}>${LN[k]}</option>`).join("")}</select>`}
+function applyTheme(){const d=document.documentElement;d.dataset.t=S.theme;d.dir=["ur","ar"].includes(S.lang)?"rtl":"ltr";d.lang=S.lang;S.acc?d.style.setProperty("--ac",S.acc):d.style.removeProperty("--ac");if(S.wp){d.style.setProperty("--wp",`url("${S.wp}")`);d.style.setProperty("--wps","cover")}else{d.style.removeProperty("--wp");d.style.removeProperty("--wps")}}
+function setLang(v){S.lang=v;save();applyTheme();S.user?shell():auth(auth.step||0)}
+/* AUTH */
+/* GOOGLE LOGIN: paste your Google OAuth "Web client ID" below (see README). Empty = demo mode. */
+const GOOGLE_CLIENT_ID=(S&&S.gcid)||"";
+const GL=`<button id="gcs" style="padding:6px;color:var(--ac2);font-size:12px">⚙️ ${GOOGLE_CLIENT_ID?"Change":"Set"} Google Client ID</button>`;
+const GLOGO=`<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+function genNum(){const d=n=>Array.from({length:n},()=>Math.floor(Math.random()*10)).join("");return `ASF ${d(1)||1}${d(3)} ${d(3)} ${d(4)}`}
+const kid=x=>String(x||"").trim().toLowerCase(),known=()=>S.known||(S.known={});
+function jwt(t){try{const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")))}catch(e){return null}}
+function gDone(p){const em=kid(p.email);if(!em)return;const pic=p.picture&&/^https:\/\/[^'"\s()\\]+$/.test(p.picture)?p.picture:null,k=known()[em];auth.id=em;
+if(k){S.user={name:k.name,num:k.num,id:em,google:1,photo:k.photo||pic||null};save();return shell()}
+auth.g={name:p.name||"",picture:pic};auth(2)}
+function gDemo(){const o=modal(`<b>${GLOGO} Google sign-in (demo)</b><small>Demo mode: no real Google account is checked. Set GOOGLE_CLIENT_ID in index.html for real Google login.</small><input id="gn1" maxlength="30" placeholder="Name" aria-label="Name"><input id="ge" type="email" placeholder="you@gmail.com" aria-label="Google email"><div id="ger" role="alert" style="color:#e74c3c;font-size:13px"></div><button class="btn" id="gok">Continue</button><button id="gx2" aria-label="Cancel" style="padding:8px">✕</button>`);
+$("#ge").focus();$("#gx2").onclick=()=>o.remove();
+$("#gok").onclick=()=>{const e=$("#ge").value.trim();if(!/^\S+@\S+\.\S+$/.test(e))return $("#ger").textContent="Enter a valid email";const nm=$("#gn1").value.trim()||e.split("@")[0];o.remove();gDone({email:e,name:nm})}}
+function gis(ok,bad){if(window.google&&google.accounts&&google.accounts.id)return ok();const e=document.createElement("script");e.src="https://accounts.google.com/gsi/client";e.async=true;e.onload=ok;e.onerror=bad;document.head.appendChild(e)}
+function gsetup(){const w=$("#gw");if(!w)return;
+if(!GOOGLE_CLIENT_ID){w.innerHTML=`<button class="gbtn" id="gd">${GLOGO}<span>${esc(t("google"))}</span></button>${GL}`;$("#gd").onclick=gDemo;return}
+const hint=location.protocol=="file:"?`<small>Google login needs http://localhost or https (not a double-clicked file).</small>`:"";const hint2=hint+GL;
+gis(()=>{const x=$("#gw");if(!x)return;x.innerHTML=hint2;google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{const p=jwt(r.credential);p&&p.email?gDone(p):toast("Google sign-in failed")}});const d=document.createElement("div");x.prepend(d);google.accounts.id.renderButton(d,{theme:"outline",size:"large",text:"continue_with",width:Math.max(200,Math.min(400,x.clientWidth||300))})},()=>{const x=$("#gw");x&&(x.innerHTML=`<small>Google sign-in could not load. Check your internet.</small>`)})}
+function finish(){const u={name:auth.nm,num:auth.num,id:auth.id};if(auth.g){u.google=1;if(auth.g.picture)u.photo=auth.g.picture}S.user=u;known()[kid(u.id)]={name:u.name,num:u.num,photo:u.photo||null,google:u.google||0};save();shell()}
+function auth(step){auth.step=step;applyTheme();let h="";if(step==0)auth.num=auth.nm=auth.g=null;if(step==2&&!auth.num)auth.num=genNum();
+if(step==0)h=`<label>${t("id")}<input id="idv" type="text" autocomplete="username" placeholder="name@mail.com / 03xx..."></label><button class="btn" id="go">${t("cont")}</button><div class="or">or</div><div id="gw"></div>`;
+if(step==1)h=`<label>${t("otp")}<input id="otp" inputmode="numeric" maxlength="6" placeholder="••••••"></label><small>Demo code: <b>123456</b></small><button class="btn" id="go">${t("verify")}</button>`;
+if(step==2)h=`${auth.g?`<div class="row2"><small>🔗 Google</small><b style="font-size:13px;overflow:hidden;text-overflow:ellipsis">${esc(auth.id)}</b></div>`:""}<label>${t("name")}<input id="nm" maxlength="30" value="${esc(auth.nm||(auth.g&&auth.g.name)||"")}"></label><div class="row2"><small>${t("num")}</small><b id="gn">${esc(auth.num)}</b></div><button class="btn" id="go">${t("start")}</button>`;
+if(step==3)h=`<b>🔒 Chat lock</b><small>Lock or hide private chats with a 4-digit PIN. You can change it later in Settings.</small><input id="p1" type="password" inputmode="numeric" maxlength="4" placeholder="PIN (4 digits)" aria-label="PIN"><input id="p2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" aria-label="Confirm PIN"><button class="btn" id="go">Save PIN</button><button id="sk" style="padding:8px;color:var(--mu)">Skip for now</button>`;
+$("#root").innerHTML=`<main id="auth"><div class="card"><div class="brand">${logo(40)} ASF Messenger <small>v5-gemini</small></div>${lsel()}<button id="akb" style="padding:9px;border:1px dashed var(--ac2);color:var(--ac2);font-weight:600">🔑 ASF AI key daalein</button><div style="display:flex;gap:8px"><button class="btn" data-th="black" style="background:#000;color:#fff;border:1px solid #555">⚫ Black</button><button class="btn" data-th="white" style="background:#fff;color:#000;border:1px solid #ccc">⚪ White</button></div>${h}<div id="er" role="alert" style="color:#e74c3c;font-size:13px"></div></div></main>`;
+$("#lg").onchange=e=>setLang(e.target.value);document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;S.acc=null;save();applyTheme()});
+if(step==0)gsetup();const sk=$("#sk");sk&&(sk.onclick=finish);
+$("#go").onclick=async()=>{const er=$("#er");
+if(step==0){const v=$("#idv").value.trim();if(!/^\S+@\S+\.\S+$/.test(v)&&!/^[+\d][\d\s-]{6,}$/.test(v))return er.textContent="Invalid email or phone";auth.id=v;auth(1)}
+else if(step==1){if($("#otp").value!="123456")return er.textContent="Wrong code (use 123456)";const k=known()[kid(auth.id)];if(k){S.user={name:k.name,num:k.num,id:auth.id,photo:k.photo||null,google:k.google||0};save();return shell()}auth(2)}
+else if(step==2){const n=$("#nm").value.trim();if(!n)return er.textContent="Name required";auth.nm=n;S.pinh?finish():auth(3)}
+else{const a=$("#p1").value;if(!/^\d{4}$/.test(a))return er.textContent="PIN must be 4 digits";if(a!=$("#p2").value)return er.textContent="PINs do not match";S.pinh=await H(a);finish()}}}
+/* SHELL */
+function shell(){applyTheme();$("#root").innerHTML=`<div class="app" id="app"><nav class="nav" aria-label="Main">${[["chats","💬"],["calls","📞"],["status","⭕"],["settings","⚙️"]].map(([k,i])=>`<button data-t="${k}" class="${tab==k?"on":""}" aria-label="${t(k)}" title="${t(k)}"><span>${i}</span><em>${t(k)}</em>${k=="chats"?`<b class="nb" id="nb" hidden></b>`:""}</button>`).join("")}<button class="rav" id="rav" aria-label="${t("settings")}">${uav()}</button></nav><aside class="side"><div class="sh"><div class="row"><div class="brand">${logo(30)}<span id="ttl">ASF ${t(tab)}</span></div><div><button class="ic" id="mm" aria-label="Menu">⋮</button><button class="ic" id="ai" title="ASF AI" aria-label="ASF AI" style="font-size:13px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));width:34px;height:34px;border-radius:50%;align-self:center;padding:0;display:grid;place-items:center;overflow:hidden">${ailogo(34)}</button><button class="ic nc" id="nc" title="Save number / New chat" aria-label="Save number / New chat">➕</button></div></div><div class="srch"><span aria-hidden="true">🔍</span><input id="q" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(q)}"></div><div id="chips" class="chips"></div></div><div class="pane" id="pane"></div></aside><section class="main" id="main"></section></div>`;
+$("#q").oninput=async e=>{q=e.target.value;rev=!!S.pinh&&/^\d{4}$/.test(q)&&(await H(q))==S.pinh;pane()};$("#nc").onclick=newChat;$("#mm").onclick=menu;$("#rav").onclick=()=>go("settings");
+document.querySelectorAll(".nav button[data-t]").forEach(b=>b.onclick=()=>go(b.dataset.t));pane();conv()}
+function go(k){tab=k;document.querySelectorAll(".nav button[data-t]").forEach(x=>x.classList.toggle("on",x.dataset.t==k));$("#ttl").textContent="ASF "+t(k);pane()}
+function menu(){ask("ASF Messenger",[{l:"⚙️ "+t("settings"),g:1,fn:()=>go("settings")},{l:"🙈 Hidden chats",g:1,fn:hiddenList},{l:["light","white"].includes(S.theme)?"🌙 Dark theme":"☀️ Light theme",g:1,fn:()=>{S.theme=["light","white"].includes(S.theme)?"black":"white";S.acc=null;save();applyTheme();pane()}},{l:"🚪 "+t("logout"),d:1,fn:()=>{S.user=null;save();cur=null;rev=false;auth(0)}}])}
+const f0=c=>flt=="all"||(flt=="unread"&&c.unread>0)||(flt=="fav"&&c.fav)||(flt=="groups"&&c.grp);
+function nbR(){const n=S.chats.reduce((a,c)=>a+(c.unread&&!muted(c)&&!c.hide&&!c.ai?c.unread:0),0),e=$("#nb");if(e){e.hidden=!n;e.textContent=n}}
+function chipsR(){const e=$("#chips");if(!e)return;e.style.display=tab=="chats"?"flex":"none";const u=S.chats.filter(c=>c.unread>0&&!c.hide&&!c.ai).length;
+e.innerHTML=[["all","All"],["unread","Unread"+(u?" "+u:"")],["fav","Favourites"],["groups","Groups"]].map(([k,l])=>`<button class="chip ${flt==k?"on":""}" data-f="${k}">${l}</button>`).join("");
+e.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{flt=b.dataset.f;pane()})}
+function pane(){const p=$("#pane"),ql=q.toLowerCase();chipsR();nbR();
+if(tab=="chats"){const cs=S.chats.filter(c=>rev?c.hide:(!c.hide&&!c.ai&&f0(c)&&(!ql||c.name.toLowerCase().includes(ql)||(c.num||"").toLowerCase().includes(ql)||(!c.lock&&c.msgs.some(m=>(m.t||"").toLowerCase().includes(ql)))))).sort((a,b)=>b.msgs.at(-1).ts-a.msgs.at(-1).ts);
+p.innerHTML=cs.map(c=>{const m=c.msgs.at(-1);return `<button class="it ${cur==c.id?"on":""}" data-c="${c.id}">${cav(c)}<span class="m"><b>${esc(c.name)}${c.grp?" 👥":""}${muted(c)?" 🔇":""}${c.blk?" 🚫":""}${c.lock?" 🔒":""}</b><small>${c.lock?"🔒 Locked chat":(m.me?tk(m)+" ":"")+(m.dl?"<i>"+esc(m.t)+"</i>":esc(m.t||m.f||"📎"))}</small></span><span style="text-align:end"><small style="${c.unread&&!muted(c)?"color:#2ecc71":""}">${lt(m.ts)}</small>${c.unread?`<br><span class="badge" style="${muted(c)?"background:var(--mu);color:#fff":""}">${c.unread}</span>`:""}</span></button>`}).join("")||`<div class="empty">Abhi koi chat nahi.<br>➕ dabakar kisi ka ASF number save karein.</div>`;
+p.querySelectorAll("[data-c]").forEach(b=>{let lt,lp=0;const c=S.chats.find(x=>x.id==+b.dataset.c);b.onclick=e=>{if(lp){lp=0;return}const st=S.sts.find(x=>x.n==c.name);if(st&&e.target.closest(".av")){st.seen=1;save();view([st]);pane();return}openG(c)};b.oncontextmenu=e=>{e.preventDefault();chatMenu(c)};b.ontouchstart=()=>{lt=setTimeout(()=>{lp=1;chatMenu(c)},600)};b.ontouchend=b.ontouchmove=()=>clearTimeout(lt)})}
+if(tab=="calls"){p.innerHTML=S.calls.map((c,i)=>`<div class="it">${av(c.n,i)}<span class="m"><b style="${c.d=="missed"?"color:#e74c3c":""}">${esc(c.n)}</b><small>${c.d=="missed"?"↙ Missed":c.d=="in"?"↙ Incoming":"↗ Outgoing"} · ${c.v?"📹":"📞"} ${new Date(c.ts).toLocaleString([], {dateStyle:"short",timeStyle:"short"})}</small></span><button class="ic" data-v="0" data-n="${esc(c.n)}" aria-label="Voice call">📞</button><button class="ic" data-v="1" data-n="${esc(c.n)}" aria-label="Video call">📹</button></div>`).join("")||`<div class="empty">Abhi koi call nahi</div>`;
+p.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>call(b.dataset.n,+b.dataset.v))}
+if(tab=="status"){const exp=Date.now()-864e5;S.mine=S.mine.filter(s=>s.ts>exp&&(s.k!="video"||VM[s.ts]));
+p.innerHTML=`<div class="set"><div class="it" style="padding:0">${uav(S.mine.length?"ring":"")}<span class="m"><b>${t("mine")}</b><small>${S.mine.length?S.mine.length+" · 24h":"—"}</small></span><button class="ic" id="vm" aria-label="View">👁</button></div><textarea id="st" rows="2" maxlength="120" placeholder="${t("addst")}…"></textarea><button class="btn" id="ps">${t("addst")}</button><input type="file" id="sf" accept="image/*,video/*" hidden><button class="btn" id="pf" style="background:var(--p2);color:var(--tx)">📷 🎥 Photo / Video</button></div>`+S.sts.map((s,i)=>`<button class="it" data-s="${i}">${av(s.n,i+1,s.seen?"ring seen":"ring")}<span class="m"><b>${esc(s.n)}</b><small>${s.seen?"Viewed":"New"}</small></span></button>`).join("");
+$("#ps").onclick=()=>{const v=$("#st").value.trim();if(!v)return toast("…");S.mine.push({t:v,ts:Date.now(),c:S.mine.length});save();pane();toast("✓")};
+$("#pf").onclick=()=>$("#sf").click();
+$("#sf").onchange=e=>{const f=e.target.files[0];if(!f)return;const cap=$("#st").value.trim(),ts=Date.now(),c=S.mine.length;
+if(f.type.startsWith("video/")){if(f.size>50e6)return toast("Video too large (50MB max)");VM[ts]=URL.createObjectURL(f);S.mine.push({k:"video",t:cap,ts,c});save();pane();toast("✓ Video status")}
+else if(f.type.startsWith("image/")){const im=new Image();im.onload=()=>{const r=Math.min(1,900/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=im.width*r;cv.height=im.height*r;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);S.mine.push({k:"image",u:cv.toDataURL("image/jpeg",.75),t:cap,ts,c});save();pane();toast("✓ Photo status")};im.onerror=()=>toast("Image could not be loaded");im.src=URL.createObjectURL(f)}
+else toast("Unsupported file")};
+$("#vm").onclick=()=>S.mine.length?view(S.mine.map(m=>({...m,n:S.user.name}))):toast("—");
+p.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const s=S.sts[+b.dataset.s];s.seen=1;save();view([s]);pane()})}
+if(tab=="settings"){p.innerHTML=`<div class="set"><div class="it" style="padding:0">${uav()}<span class="m"><b>${esc(S.user.name)}</b><small>${esc(S.user.num)}</small>${S.user.google?`<small>🔗 Google · ${esc(S.user.id)}</small>`:""}<small>${esc(S.user.about||"")}</small>${S.user.stt?`<small>💭 ${esc(S.user.stt)}</small>`:""}</span><button class="ic" id="ep" aria-label="Edit profile">✏️</button><button class="ic" id="cp" aria-label="Copy number">📋</button></div>
+<div class="row2"><span>🌐 ${t("lang")}</span>${lsel()}</div>
+<div class="row2"><span>✨ ASF AI key</span><button id="aik" class="btn" style="width:auto;padding:8px 14px">${S.aik?"Change":"Set"}</button></div>
+<div class="row2" style="flex-wrap:wrap"><span>🎨 Theme</span><div style="display:flex;gap:6px;flex-wrap:wrap">${TH.map(([k,n,c])=>`<button data-th="${k}" aria-label="${n}" title="${n}" style="width:30px;height:30px;border-radius:50%;background:${c};border:3px solid ${S.theme==k?"var(--tx)":"transparent"};box-shadow:0 0 0 1px var(--bd)"></button>`).join("")}</div></div>
+<div class="row2"><span>🖌 Accent</span><input type="color" id="ac" value="${S.acc||"#6c5ce7"}" aria-label="Accent color" style="width:46px;height:36px;padding:2px"></div>
+<div class="row2" style="flex-wrap:wrap"><span>🖼 Chat wallpaper</span><span><button class="ic" id="wp" style="width:auto;padding:0 10px;background:var(--p2)">Upload</button>${S.wp?`<button class="ic" id="wx" style="width:auto;padding:0 10px">Remove</button>`:""}<input type="file" id="wf" accept="image/*" hidden></span></div>
+<div class="row2"><span>🔒 Chat lock PIN</span><button class="ic" id="cpn" style="width:auto;padding:0 10px;background:var(--p)">${S.pinh?"Change":"Set"}</button></div>
+<div class="row2"><span>🙈 Hidden chats</span><button class="ic" id="hc" style="width:auto;padding:0 10px;background:var(--p)">View</button></div>
+<div class="row2"><span>✓✓ ${t("priv")}</span><button class="sw ${S.rr?"on":""}" id="rr" role="switch" aria-checked="${S.rr}" aria-label="${t("priv")}"></button></div>
+<div class="row2"><span>🔒 Session</span><small>${navigator.userAgent.includes("Mobile")?"Mobile":"Desktop"} · this device</small></div>
+${blkHtml()}<button class="btn" id="lo" style="background:#c0392b">${t("logout")}</button></div>`;
+$("#lg").onchange=e=>setLang(e.target.value);
+$("#ep").onclick=editProfile;
+$("#cp").onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(S.user.num).then(()=>toast("✓"),()=>toast(S.user.num))};
+p.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;S.acc=null;save();applyTheme();pane()});$("#ac").oninput=e=>{S.acc=e.target.value;save();applyTheme()};$("#wp").onclick=()=>$("#wf").click();$("#wf").onchange=e=>img2url(e.target.files[0],1280,.6,u=>{S.wp=u;save();applyTheme();pane();toast("✓ Wallpaper set")});const wx=$("#wx");wx&&(wx.onclick=()=>{S.wp=null;save();applyTheme();pane()});$("#cpn").onclick=()=>S.pinh?pinAsk("Enter current PIN",()=>pinSet()):pinSet();
+$("#hc").onclick=hiddenList;$("#rr").onclick=()=>{S.rr=!S.rr;save();pane()};
+p.querySelectorAll("[data-ub]").forEach(b=>b.onclick=()=>{const c=S.chats.find(x=>x.id==+b.dataset.ub);c.blk=0;toast("✅ Unblocked "+c.name);save();pane()});p.querySelectorAll("[data-um]").forEach(b=>b.onclick=()=>{const c=S.chats.find(x=>x.id==+b.dataset.um);c.mute=0;toast("🔔 Unmuted "+c.name);save();pane()});
+$("#lo").onclick=()=>{S.user=null;save();cur=null;rev=false;auth(0)}}}
+const dg=x=>x.replace(/\D/g,""),fmt=d=>`ASF ${d.slice(0,4)} ${d.slice(4,7)} ${d.slice(7,11)}`;
+function newChat(){const o=document.createElement("div");o.className="ov";o.setAttribute("role","dialog");
+o.innerHTML=`<div class="card" style="color:var(--tx);text-align:start"><b>➕ Save number</b><input id="sn" maxlength="30" placeholder="Name" aria-label="Name"><input id="sm" inputmode="numeric" placeholder="ASF 1234 567 8901" aria-label="ASF number"><small>${esc(t("num"))}: ${esc(S.user.num)}</small><div id="se" role="alert" style="color:#e74c3c;font-size:13px"></div><button class="btn" id="ss">Save</button><button id="sx" style="padding:8px">✕</button></div>`;
+document.body.appendChild(o);$("#sn").focus();$("#sx").onclick=()=>o.remove();
+$("#ss").onclick=async()=>{const n=$("#sn").value.trim(),d=dg($("#sm").value),e=$("#se");
+if(!n)return e.textContent="Name required";
+if(d.length!=11)return e.textContent="Number must have 11 digits (ASF 1234 567 8901)";
+if(d==dg(S.user.num))return e.textContent="This is your own number";
+const ex=S.chats.find(c=>c.num&&dg(c.num)==d);
+if(ex){o.remove();toast("Already saved: "+ex.name);return openG(ex)}
+e.textContent="Check ho raha hai…";const r=await lookup(fmt(d));if(!r)return e.textContent="Server se rabta nahi hua (npm start chal raha hai? http://localhost:3000 se kholein)";if(!r.ok)return e.textContent="Ye ASF number kisi ne register nahi kiya";
+const id=Date.now();S.chats.push({id,name:n,num:fmt(d),on:1,unread:0,msgs:[{t:"👋",me:1,ts:Date.now()}]});save();o.remove();go("chats");toast("✓ Saved "+fmt(d));open(id)}}
+/* CONVERSATION */
+function open(id){cur=id;const c=S.chats.find(x=>x.id==id);c.unread=0;save();$("#app").classList.add("open");pane();conv()}
+const EM=["😀","😂","😍","👍","🙏","🔥","🎉","❤️","😢","😮","🤝","✅"];
+function conv(){const m=$("#main");const c=S.chats.find(x=>x.id==cur);
+if(!c){m.innerHTML=`<div class="empty">${logo(80)}<h2>ASF Messenger</h2><small>${t("start")}</small></div>`;return}
+m.innerHTML=`<div class="ch"><button class="ic back" id="bk" aria-label="Back">←</button>${cav(c)}<div class="m"><b>${esc(c.name)}</b>${c.num?`<small>${esc(c.num)}</small>`:""}<small id="pres">${c.on?t("online"):"last seen today"}</small></div><button class="ic" id="gl" aria-label="Media">🖼</button><button class="ic" data-v="1" aria-label="Video call">📹</button><button class="ic" data-v="0" aria-label="Voice call">📞</button><button class="ic" id="sr" aria-label="Search in chat">🔍</button><button class="ic" id="cl" title="Chat options" aria-label="Chat options">⋮</button></div><div id="sb" hidden style="padding:8px 12px;background:var(--p)"><input id="si" type="search" placeholder="Search in chat" aria-label="Search in chat"></div><div class="msgs" id="ms" aria-live="polite"></div><div id="ep"></div><div id="rps" class="qt" hidden style="margin:0 12px"></div><div class="comp"><button class="ic" id="ab" aria-label="Attach">📎</button><button class="ic" id="eb" aria-label="Emoji">😊</button><input type="file" id="fi" hidden accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"><input id="in" placeholder="${t("type")}" aria-label="${t("type")}" autocomplete="off"><button class="ic" id="mc" aria-label="Voice message">🎤</button><button class="ic" id="sd" aria-label="Send">➤</button></div>`;
+$("#bk").onclick=()=>{$("#app").classList.remove("open");cur=null;pane();conv()};
+m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>c.blk?toast("Unblock to call"):call(c.name,+b.dataset.v));
+$("#cl").onclick=()=>chatMenu(c);
+$("#sd").onclick=()=>send(c);$("#in").onkeydown=e=>{if(e.key=="Enter")send(c)};
+$("#eb").onclick=()=>{const ep=$("#ep");ep.className=ep.className?"":"emo";ep.innerHTML=ep.className?EM.map(e=>`<button aria-label="${e}">${e}</button>`).join(""):"";ep.querySelectorAll("button").forEach(b=>b.onclick=()=>{$("#in").value+=b.textContent;$("#in").dispatchEvent(new Event("input"));$("#in").focus()})};
+$("#ab").onclick=()=>$("#fi").click();
+$("#fi").onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>50e6)return toast("File too large (50MB max)");const u=URL.createObjectURL(f);push(c,{f:f.name,u,k:f.type.split("/")[0]});toast("✓ "+f.name)};
+$("#mc").onclick=()=>voice(c);$("#gl").onclick=()=>gallery(c);msq="";rp=null;$("#sr").onclick=()=>{const b=$("#sb");b.hidden=!b.hidden;if(b.hidden){msq="";msgs()}else $("#si").focus()};$("#si").oninput=e=>{msq=e.target.value.toLowerCase();msgs()};const upd=()=>{const v=$("#in").value.trim();$("#sd").hidden=!v;$("#mc").hidden=!!v};$("#in").oninput=upd;upd();msgs();$("#in").focus();if(c.blk){$(".comp").innerHTML=`<small style="flex:1;text-align:center">🚫 You blocked ${esc(c.name)}</small><button class="btn" style="width:auto" id="ub">Unblock</button>`;$("#ub").onclick=()=>toggleBlock(c)}}
+function msgs(){const c=S.chats.find(x=>x.id==cur);if(!c)return;let last="",h="";
+c.msgs.forEach((x,i)=>{if(msq&&!(x.t||"").toLowerCase().includes(msq))return;const d=new Date(x.ts).toDateString();if(d!=last){h+=`<div class="sep">${dlabel(x.ts)}</div>`;last=d}
+let body=x.u?(x.k=="image"?`<img src="${x.u}" alt="${esc(x.f)}">`:x.k=="video"?`<video src="${x.u}" controls></video>`:x.k=="audio"?`<audio src="${x.u}" controls></audio>`:`<a href="${x.u}" download="${esc(x.f)}" style="color:inherit">📄 ${esc(x.f)} ⬇</a>`):esc(x.t);
+h+=`<div class="b ${x.me?"me":""}" data-i="${i}" tabindex="0"${x.dl?' style="font-style:italic;opacity:.7"':""}>${x.fwd?"<small>↪ Forwarded</small>":""}${x.q?`<div class="qt"><b>${esc(x.q.n)}</b><span>${esc(x.q.t)}</span></div>`:""}${body}${x.rx?`<div class="rx">${x.rx}</div>`:""}<i>${x.ed?"edited · ":""}${tm(x.ts)} ${x.me?tk(x):""}</i></div>`});
+const ms=$("#ms");ms.innerHTML=h;ms.scrollTop=ms.scrollHeight;
+ms.querySelectorAll(".b").forEach(b=>{const go=()=>{const old=b.querySelector(".act");document.querySelectorAll(".act").forEach(a=>a.remove());if(old)return;const i=+b.dataset.i,x=c.msgs[i];
+b.insertAdjacentHTML("beforeend",`<div class="act">${x.dl?"":`<button data-a="r">👍</button><button data-a="h">❤️</button><button data-a="p">↩ Reply</button><button data-a="f">↪ Forward</button>`}${x.t&&!x.dl?`<button data-a="c">Copy</button>`:""}${x.me&&x.t&&!x.dl?`<button data-a="e">Edit</button>`:""}<button data-a="d">Delete</button></div>`);
+b.querySelectorAll("[data-a]").forEach(a=>a.onclick=ev=>{ev.stopPropagation();const k=a.dataset.a;
+if(k=="p"){rp={n:x.me?"You":c.name,t:x.t||x.f||"📎"};showRp();$("#in").focus();return}if(k=="f")return fwd(x);if(k=="d")return delMsg(c,i);
+if(k=="r"||k=="h")x.rx=k=="r"?"👍":"❤️";
+if(k=="c")navigator.clipboard&&navigator.clipboard.writeText(x.t).then(()=>toast("✓"));
+if(k=="e"){const n=prompt("Edit",x.t);if(n){x.t=n;x.ed=1}}
+save();msgs();pane()})};b.onclick=go;b.onkeydown=e=>e.key=="Enter"&&go()})}
+function ask(title,opts){const o=document.createElement("div");o.className="ov";o.setAttribute("role","dialog");o.setAttribute("aria-label",title);
+o.innerHTML=`<div class="card" style="color:var(--tx);text-align:start;max-height:85vh;overflow:auto"><b>${esc(title)}</b>${opts.map((p,j)=>`<button class="btn" data-j="${j}" style="${p.d?"background:#c0392b":p.g?"background:var(--p2);color:var(--tx)":""}">${esc(p.l)}</button>`).join("")}<button data-j="x" style="padding:8px" aria-label="Cancel">✕</button></div>`;
+document.body.appendChild(o);o.onclick=e=>{if(e.target==o)o.remove()};o.querySelectorAll("[data-j]").forEach(b=>b.onclick=()=>{o.remove();const p=opts[b.dataset.j];p&&p.fn()})}
+function delMsg(c,i){const x=c.msgs[i],fin=()=>{if(!c.msgs.length)c.msgs.push({t:"—",me:0,ts:Date.now()});save();msgs();pane()};
+const o=[{l:"Delete for me",d:1,fn:()=>{c.msgs.splice(i,1);fin()}}];
+if(x.me&&!x.dl)o.unshift({l:"Delete for everyone",d:1,fn:()=>{Object.assign(x,{t:"🚫 You deleted this message",dl:1,rx:"",ed:0});delete x.u;delete x.f;delete x.k;delete x.fwd;fin()}});
+ask("Delete message?",o)}
+function fwd(x){ask("Forward to…",S.chats.filter(ch=>!ch.hide||rev).map(ch=>({l:ch.name,g:1,fn:()=>{const m={fwd:1};if(x.t)m.t=x.t;if(x.u){m.u=x.u;m.f=x.f;m.k=x.k}push(ch,m);toast("↪ Forwarded to "+ch.name)}})))}
+function chatMenu(c){ask(c.name,[
+{l:c.fav?"☆ Remove from favourites":"⭐ Add to favourites",g:1,fn:()=>{c.fav=c.fav?0:1;refresh(c)}},
+{l:muted(c)?"🔔 Unmute notifications":"🔇 Mute notifications",g:1,fn:()=>toggleMute(c)},
+{l:c.blk?"✅ Unblock":"🚫 Block",g:1,fn:()=>toggleBlock(c)},
+{l:c.lock?"🔓 Unlock chat":"🔒 Lock chat",g:1,fn:()=>toggleLock(c)},
+{l:c.hide?"👁 Unhide chat":"🙈 Hide chat",g:1,fn:()=>toggleHide(c)},
+{l:c.on?"⚫ Set contact offline (demo)":"🟢 Set contact online (demo)",g:1,fn:()=>{c.on=c.on?0:1;if(c.on){c.msgs.forEach(m=>m.me&&m.st===1&&(m.st=2));setTimeout(()=>{c.msgs.forEach(m=>m.me&&m.st===2&&S.rr&&(m.st=3));save();if(cur==c.id)msgs();pane()},2000)}refresh(c)}},
+{l:"Clear chat",g:1,fn:()=>ask("Clear all messages?",[{l:"Clear",d:1,fn:()=>{c.msgs=[{t:"—",me:0,ts:Date.now()}];save();msgs();pane()}}])},
+{l:"Delete chat",d:1,fn:()=>ask("Delete chat with "+c.name+"?",[{l:"Delete",d:1,fn:()=>delChat(c.id)}])}])}
+function refresh(c){save();pane();if(cur==c.id)conv()}
+function setMute(c,ms){c.mute=Date.now()+ms;toast("🔇 Muted "+c.name);refresh(c)}
+function toggleMute(c){if(muted(c)){c.mute=0;toast("🔔 Unmuted "+c.name);return refresh(c)}
+ask("Mute notifications",[{l:"8 hours",g:1,fn:()=>setMute(c,8*36e5)},{l:"1 week",g:1,fn:()=>setMute(c,7*864e5)},{l:"Always",g:1,fn:()=>setMute(c,9e15)}])}
+function toggleBlock(c){if(c.blk){c.blk=0;toast("✅ Unblocked "+c.name);return refresh(c)}
+ask("Block "+c.name+"?",[{l:"Block",d:1,fn:()=>{c.blk=1;toast("🚫 Blocked "+c.name);refresh(c)}}])}
+function blkHtml(){const b=S.chats.filter(c=>c.blk),m=S.chats.filter(c=>muted(c));
+const r=(c,k,l)=>`<div class="row2"><span>${esc(c.name)}</span><button class="ic" data-${k}="${c.id}" style="width:auto;padding:0 12px">${l}</button></div>`;
+return `<b>🚫 Blocked</b>${b.map(c=>r(c,"ub","Unblock")).join("")||"<small>None</small>"}<b>🔇 Muted</b>${m.map(c=>r(c,"um","Unmute")).join("")||"<small>None</small>"}`}
+function delChat(id){S.chats=S.chats.filter(x=>x.id!=id);if(cur==id){cur=null;$("#app").classList.remove("open")}save();pane();conv();toast("Chat deleted")}
+function push(c,m){if(c.blk)return toast("Unblock to send messages");c.msgs.push({me:1,ts:Date.now(),st:c.num?0:2,...m});const x=c.msgs.at(-1);if(c.num){if(x.t)netSend(c,x);else toast("Photo/file abhi sirf aapke device par hai, doosre ko nahi jayegi")}save();msgs();pane();reply(c)}
+function send(c){const i=$("#in"),v=i.value.trim();if(!v)return;i.value="";i.dispatchEvent(new Event("input"));push(c,rp?{t:v,q:rp}:{t:v});rp=null;showRp()}
+const R=["Theek hai 👍","Haha 😂","Acha, phir baat karte hain","Zabardast!","Main abhi dekhta hoon","Shukriya ❤️","Okay 🙌"];
+function reply(c){if(c.ai)return aiReply(c)}
+async function voice(c){const b=$("#mc");
+if(rec){rec.stop();return}
+try{const s=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];rec=new MediaRecorder(s);rec.ondataavailable=e=>ch.push(e.data);
+rec.onstop=()=>{s.getTracks().forEach(x=>x.stop());rec=null;b.textContent="🎤";const bl=new Blob(ch,{type:"audio/webm"});push(c,{f:"Voice message",u:URL.createObjectURL(bl),k:"audio"})};rec.start();b.textContent="⏹";toast("Recording… tap again to send")}
+catch(e){toast("Microphone permission denied")}}
+/* CALLS */
+async function call(n,video){if(S.chats.some(x=>x.name==n&&x.blk))return toast("Unblock to call");let sec=0,mic=1,cam=1,iv;const o=document.createElement("div");o.className="ov pulse";o.setAttribute("role","dialog");
+const draw=st=>{o.innerHTML=`${video?`<video id="self" autoplay muted playsinline></video>`:""}${av(n,n.length)}<h2>${esc(n)}</h2><div id="cs">${st}</div><div class="ctr"><button id="m" class="${mic?"":"off"}" aria-label="Mute">${mic?"🎙":"🔇"}</button>${video?`<button id="cm" class="${cam?"":"off"}" aria-label="Camera">${cam?"📷":"🚫"}</button>`:`<button id="sp" aria-label="Speaker">🔊</button>`}<button class="end" id="en" aria-label="End call">📵</button></div>`;
+if(stream&&video){const v=o.querySelector("#self");v.srcObject=stream}
+o.querySelector("#m").onclick=()=>{mic=!mic;stream&&stream.getAudioTracks().forEach(t=>t.enabled=mic);draw(o.dataset.st||"")};
+const cm=o.querySelector("#cm");cm&&(cm.onclick=()=>{cam=!cam;stream&&stream.getVideoTracks().forEach(t=>t.enabled=cam);draw(o.dataset.st||"")});
+const sp=o.querySelector("#sp");sp&&(sp.onclick=()=>sp.classList.toggle("off"));
+o.querySelector("#en").onclick=end};
+function end(){clearInterval(iv);stream&&stream.getTracks().forEach(t=>t.stop());stream=null;o.remove();S.calls.unshift({n,v:video,d:"out",ts:Date.now()});save();tab=="calls"&&pane()}
+document.body.appendChild(o);draw(t("call"));o.dataset.st=t("call");
+try{stream=await navigator.mediaDevices.getUserMedia({audio:true,video:!!video});draw(t("call"))}catch(e){toast("Camera/mic permission denied");stream=null}
+setTimeout(()=>{if(!o.isConnected)return;o.classList.remove("pulse");iv=setInterval(()=>{sec++;const s=`${t("conn")} · ${String(sec/60|0).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;o.dataset.st=s;const e=o.querySelector("#cs");e&&(e.textContent=s)},1000);o.dataset.st=t("conn");o.querySelector("#cs").textContent=t("conn")},2500)}
+/* STATUS VIEWER */
+function view(list){let i=0,tm;const o=document.createElement("div");o.className="ov";o.setAttribute("role","dialog");document.body.appendChild(o);
+const close=()=>{clearTimeout(tm);o.remove()};
+const show=()=>{const s=list[i];clearTimeout(tm);o.style.background=col[(s.c||0)%6];
+const md=s.k=="image"?`<img src="${s.u}" alt="" style="max-width:100%;max-height:60vh;border-radius:14px">`:s.k=="video"?`<video id="sv" src="${VM[s.ts]||""}" autoplay playsinline style="max-width:100%;max-height:60vh;border-radius:14px"></video>`:"";
+o.innerHTML=`<div class="bar"><i id="pb"></i></div><b>${esc(s.n)}</b>${md}${s.t?`<div style="font-size:${md?18:26}px;font-weight:600;max-width:90%">${esc(s.t)}</div>`:""}<small style="color:#fffb">${tm_(s.ts)}</small><button class="btn" style="width:auto;background:#0006" id="x" aria-label="Close">✕</button>`;
+o.querySelector("#x").onclick=close;const nx=()=>{i++;i<list.length?show():close()};
+if(s.k=="video"){const v=o.querySelector("#sv");v.onended=nx;v.onerror=nx;v.onloadedmetadata=()=>{const p=o.querySelector("#pb");p.style.transition=`width ${v.duration}s linear`;requestAnimationFrame(()=>p.style.width="100%")};tm=setTimeout(nx,60000)}
+else{requestAnimationFrame(()=>requestAnimationFrame(()=>{const p=o.querySelector("#pb");p&&(p.style.width="100%")}));tm=setTimeout(nx,5000)}};
+show()}
+const tm_=ts=>ts?new Date(ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"";
+const TH=[["dark","Dark","#0e1116"],["light","Light","#f3f5f9"],["black","Pure Black","#000000"],["white","Pure White","#ffffff"],["ocean","Ocean","#1e90ff"],["forest","Forest","#2ecc71"],["sunset","Sunset","#ff7043"],["rose","Rose","#e84393"]];
+const tk=x=>{const st=x.st??2;return st===0?"🕓":st===1?"✓":st===3&&S.rr?`<span style="color:#3aa0ff">✓✓</span>`:"✓✓"};
+const H=async x=>{try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("asf:"+x));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,"0")).join("")}catch(e){return btoa("asf:"+x)}};
+function modal(h){const o=document.createElement("div");o.className="ov";o.setAttribute("role","dialog");o.innerHTML=`<div class="card" style="color:var(--tx);text-align:start;max-height:90vh;overflow:auto">${h}</div>`;document.body.appendChild(o);o.onclick=e=>{if(e.target==o)o.remove()};return o}
+function img2url(f,mx,q,cb){if(!f||!f.type.startsWith("image/"))return toast("Choose an image");const im=new Image();im.onload=()=>{const r=Math.min(1,mx/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=im.width*r;cv.height=im.height*r;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",q))};im.onerror=()=>toast("Image could not be loaded");im.src=URL.createObjectURL(f)}
+function pinAsk(title,cb){const o=modal(`<b>🔒 ${esc(title)}</b><input id="pn" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN (4 digits)" aria-label="PIN"><div id="pe" role="alert" style="color:#e74c3c;font-size:13px"></div><button class="btn" id="po">OK</button>`);
+$("#pn").focus();const go=async()=>{const v=$("#pn").value;if(!/^\d{4}$/.test(v))return $("#pe").textContent="Enter 4 digits";if(await H(v)!=S.pinh)return $("#pe").textContent="Wrong PIN";o.remove();cb()};$("#po").onclick=go;$("#pn").onkeydown=e=>e.key=="Enter"&&go()}
+function pinSet(cb){const o=modal(`<b>🔒 Create chat-lock PIN</b><input id="p1" type="password" inputmode="numeric" maxlength="4" placeholder="New PIN (4 digits)" aria-label="New PIN"><input id="p2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" aria-label="Confirm PIN"><div id="pe" role="alert" style="color:#e74c3c;font-size:13px"></div><button class="btn" id="po">Save PIN</button>`);
+$("#p1").focus();$("#po").onclick=async()=>{const a=$("#p1").value;if(!/^\d{4}$/.test(a))return $("#pe").textContent="PIN must be 4 digits";if(a!=$("#p2").value)return $("#pe").textContent="PINs do not match";S.pinh=await H(a);save();o.remove();toast("✓ PIN saved");cb&&cb()}}
+function openG(c){c.lock&&!rev?pinAsk("Locked chat",()=>open(c.id)):open(c.id)}
+function toggleLock(c){const go=()=>{c.lock=1;toast("🔒 Chat locked");refresh(c)};
+if(c.lock)return pinAsk("Enter PIN to unlock",()=>{c.lock=0;c.hide=0;toast("🔓 Chat unlocked");refresh(c)});
+S.pinh?go():pinSet(go)}
+function toggleHide(c){if(c.hide){c.hide=0;toast("Chat visible again");return refresh(c)}
+const go2=()=>{c.lock=1;c.hide=1;if(cur==c.id){cur=null;$("#app").classList.remove("open")}save();pane();conv();toast("🙈 Hidden & locked. Type your PIN in the search bar to see it")};S.pinh?go2():pinSet(go2)}
+function hiddenList(){const hs=S.chats.filter(c=>c.hide);if(!hs.length||!S.pinh)return toast("No hidden chats");
+pinAsk("Enter PIN to view hidden chats",()=>{const o=modal(`<b>🙈 Hidden chats</b>${hs.map(c=>`<div class="row2"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(c.name)}</span><span style="display:flex;gap:4px"><button class="ic" data-o="${c.id}" style="width:auto;padding:0 10px;background:var(--p)">Open</button><button class="ic" data-u="${c.id}" style="width:auto;padding:0 10px;background:var(--p)">Unhide</button></span></div>`).join("")}<button id="hx" aria-label="Close" style="padding:8px">✕</button>`);
+$("#hx").onclick=()=>o.remove();
+o.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{o.remove();go("chats");open(+b.dataset.o)});
+o.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{const c=S.chats.find(x=>x.id==+b.dataset.u);c.hide=0;save();b.closest(".row2").remove();pane();toast("Chat visible again")})})}
+const uav=(x="")=>S.user.photo?`<div class="av ${x}" style="background:url('${S.user.photo}') center/cover" aria-hidden="true"></div>`:av(S.user.name,0,x);
+function editProfile(){const u=S.user;let ph=u.photo||null,cv=u.cover||null;
+const pg=document.createElement("div");pg.id="pg";pg.setAttribute("role","dialog");pg.style.cssText="position:fixed;inset:0;z-index:60;background:var(--bg);overflow:auto;padding-top:env(safe-area-inset-top,0px)";
+const pill="background:var(--p);padding:8px 14px;border-radius:99px;color:var(--ac2);font-weight:600";
+pg.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--p);position:sticky;top:0;z-index:2"><button class="ic" id="px" aria-label="Close">✕</button><b style="flex:1;font-size:18px">Profile</b><button class="btn" id="ps" style="width:auto;padding:9px 24px;border-radius:99px">Save</button></div>
+<div style="max-width:560px;margin:0 auto;padding:16px;display:grid;gap:14px"><div id="pcv" style="height:170px;border-radius:16px;position:relative"><button id="pce" style="position:absolute;top:10px;inset-inline-end:10px;${pill}">📷 Edit</button></div>
+<div style="display:grid;justify-items:center;gap:8px;margin-top:-66px;position:relative"><input id="pst" maxlength="60" value="${esc(u.stt||"")}" placeholder="What's happening?" aria-label="Status" style="width:240px;text-align:center;border-radius:99px;background:var(--p)"><div id="pav" style="width:112px;height:112px;border-radius:50%;border:4px solid var(--bg);display:grid;place-items:center;font-size:36px;color:#fff;background-size:cover;background-position:center"></div><button id="pae" style="${pill};margin-top:-28px;position:relative">📷 Edit</button></div>
+<h3>Profile information</h3><label>Name<input id="pn" maxlength="30" value="${esc(u.name)}"></label><label>Description / About<input id="pa" maxlength="120" value="${esc(u.about||"")}" placeholder="Description"></label><label>Address<input id="pad" maxlength="120" value="${esc(u.addr||"")}" placeholder="Address"></label>
+<label>Coverage area<select id="pcov">${["Exact location","City only","Country only"].map(x=>`<option ${u.cov==x?"selected":""}>${x}</option>`).join("")}</select></label>
+<div class="row2"><small>${t("num")}</small><b>${esc(u.num)}</b></div>${u.google?`<div class="row2"><small>🔗 Google</small><b style="font-size:13px">${esc(u.id)}</b></div>`:""}
+<input type="file" id="pf1" accept="image/*" hidden><input type="file" id="pf2" accept="image/*" hidden></div>`;
+document.body.appendChild(pg);
+const draw=()=>{$("#pcv").style.background=cv?`url("${cv}") center/cover`:"linear-gradient(135deg,var(--p2),var(--p))";const a=$("#pav");a.style.backgroundImage=ph?`url("${ph}")`:"none";a.style.backgroundColor=ph?"transparent":col[0];a.textContent=ph?"":ini(u.name)};draw();
+$("#px").onclick=()=>pg.remove();$("#pce").onclick=()=>$("#pf1").click();$("#pae").onclick=()=>$("#pf2").click();
+$("#pf1").onchange=e=>img2url(e.target.files[0],800,.7,x=>{cv=x;draw()});$("#pf2").onchange=e=>img2url(e.target.files[0],256,.8,x=>{ph=x;draw()});
+$("#ps").onclick=()=>{const n=$("#pn").value.trim();if(!n)return toast("Name required");Object.assign(u,{name:n,about:$("#pa").value.trim(),addr:$("#pad").value.trim(),cov:$("#pcov").value,stt:$("#pst").value.trim(),photo:ph,cover:cv});{const kk=known()[kid(u.id)];kk&&(kk.name=n,kk.photo=ph||null)}save();pg.remove();pane();toast("✓ Profile updated")}}
+const dd=ts=>Math.round((new Date().setHours(0,0,0,0)-new Date(ts).setHours(0,0,0,0))/864e5);
+const dlabel=ts=>{const d=dd(ts);return d<=0?"Today":d==1?"Yesterday":d<7?new Date(ts).toLocaleDateString([], {weekday:"long"}):new Date(ts).toLocaleDateString([], {day:"numeric",month:"short",year:"numeric"})};
+const lt=ts=>{const d=dd(ts);return d<=0?tm(ts):d==1?"Yesterday":d<7?new Date(ts).toLocaleDateString([], {weekday:"long"}):new Date(ts).toLocaleDateString([], {day:"numeric",month:"short"})};
+const cav=c=>{if(c.ai)return `<div class="av ${c.on?"on":""}" aria-hidden="true">${ailogo(46)}</div>`;const s=S.sts.find(x=>x.n==c.name);return av(c.name,c.id,(c.on?"on ":"")+(s?(s.seen?"ring seen":"ring"):""))};
+function showRp(){const e=$("#rps");if(!e)return;e.hidden=!rp;e.innerHTML=rp?`<button class="ic" id="rx" aria-label="Cancel reply" style="float:inline-end;width:26px;height:26px">✕</button><b>${esc(rp.n)}</b><span>${esc(rp.t)}</span>`:"";const x=$("#rx");x&&(x.onclick=()=>{rp=null;showRp()})}
+function gallery(c){const m=c.msgs.filter(x=>x.u&&(x.k=="image"||x.k=="video"));const o=modal(`<b>🖼 Media</b>${m.length?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${m.map(x=>x.k=="image"?`<img src="${x.u}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px">`:`<video src="${x.u}" controls style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px"></video>`).join("")}</div>`:"<small>No photos or videos in this chat yet.</small>"}<button id="gx" aria-label="Close">✕</button>`);$("#gx").onclick=()=>o.remove()}
+/* NETWORK */
+addEventListener("offline",()=>{document.body.insertAdjacentHTML("afterbegin",`<div class="net" id="nt" role="alert">Offline — messages will be sent when you reconnect</div>`)});
+addEventListener("online",()=>{const e=$("#nt");e&&e.remove();toast("Back online");if(!S.user)return;S.chats.forEach(c=>{let f=0;c.msgs.forEach(m=>{if(m.me&&m.st===0&&!c.num){m.st=c.on?2:1;f=c.on}});f&&setTimeout(()=>reply(c),500)});save();msgs();pane()});
+applyTheme();S.user?shell():auth(0);
+
+/* ASF AI */
+const GEMINI_MODEL="gemini-flash-latest";/* agar model band ho jaye to yahan naya naam likhein */
+async function askAI(c){if(!S.aik)return"Main abhi offline mode mein hoon 🤖 Asli jawab ke liye 🔑 ASF AI key mein apni Gemini API key daalein.";
+const h=[];c.msgs.slice(-12).forEach(m=>{if(!m.t)return;const r=m.me?"user":"model";h.length&&h.at(-1).role==r?h.at(-1).parts[0].text+="\n"+m.t:h.push({role:r,parts:[{text:m.t}]})});while(h.length&&h[0].role!="user")h.shift();
+const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GEMINI_MODEL+":generateContent",{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":S.aik},body:JSON.stringify({systemInstruction:{parts:[{text:"You are ASF AI, a helpful assistant inside ASF Messenger. Reply briefly in the same language and script the user writes in (Roman Urdu stays Roman Urdu)."}]},contents:h,generationConfig:{maxOutputTokens:600}})});
+const d=await r.json();if(!r.ok)throw new Error(d.error&&d.error.message||r.status);return((d.candidates||[])[0]?.content?.parts||[]).map(x=>x.text||"").join("")||"(khali jawab)"}
+async function aiReply(c){const id=c.id,p=()=>$("#pres");cur==id&&p()&&(p().innerHTML=`<span class="typing"><span></span><span></span><span></span></span> ${t("typing")}`);
+let a;try{a=await askAI(c)}catch(e){a="Maaf kijiye, AI se rabta nahi ho saka ("+(e.message||"error")+"). Settings mein key check karein."}
+c.msgs.forEach(m=>m.me&&(m.st??2)>=2&&(m.st=3));c.msgs.push({t:a,me:0,ts:Date.now()});if(cur==id){p()&&(p().textContent=t("online"));msgs()}else c.unread++;save();pane()}
+function aiKey(){const o=modal(`<b>✨ ASF AI key</b><small>Apni Gemini API key (AIza...) paste karein. Ye sirf aapke browser mein save hoti hai. Is file ko key ke saath online publish na karein.</small><input id="akv" type="text" placeholder="AIza..." value="${esc(S.aik||"")}" aria-label="API key" autocomplete="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security:disc"><button id="akvp" style="padding:8px;color:var(--ac2)">📋 Clipboard se paste karein</button><button class="btn" id="aks">Save</button>${S.aik?`<button id="akr" style="padding:8px;color:#e74c3c">Remove key</button>`:""}`);
+$("#akvp").onclick=()=>pasteKey("#akv");$("#aks").onclick=()=>{S.aik=$("#akv").value.trim()||null;save();o.remove();pane();toast("✓ Saved")};const r=$("#akr");r&&(r.onclick=()=>{S.aik=null;save();o.remove();pane()})}
+document.addEventListener("click",e=>{if(!S.user)return;if(e.target.closest("#aik"))return aiKey();if(e.target.closest("#ai")){const c=S.chats.find(x=>x.ai);if(!c)return;tab="chats";go("chats");openG(c)}});
+
+function gcidAsk(){const o=modal(`<b>🔗 Real Google login</b><small>1) console.cloud.google.com → APIs &amp; Services → Credentials → Create OAuth client ID → Web application.<br>2) Authorized JavaScript origins mein ye daalein: <b>${esc(location.origin)}</b><br>3) Jo Client ID mile wo yahan paste karein.</small><input id="gcv" placeholder="xxxx.apps.googleusercontent.com" value="${esc(S.gcid||"")}" aria-label="Google Client ID"><button class="btn" id="gcsv">Save</button>${S.gcid?`<button id="gcr" style="padding:8px;color:#e74c3c">Remove (demo mode)</button>`:""}`);
+$("#gcsv").onclick=()=>{const v=$("#gcv").value.trim();if(v&&!/\.apps\.googleusercontent\.com$/.test(v))return toast("Client ID galat lag raha hai");S.gcid=v||null;save();location.reload()};const r=$("#gcr");r&&(r.onclick=()=>{S.gcid=null;save();location.reload()})}
+document.addEventListener("click",e=>{if(e.target.closest("#gcs"))gcidAsk()});
+
+/* REAL CHAT (server.js se) */
+let ws=null,wsOk=0;const pend={},SRV=location.protocol.startsWith("http")?(location.protocol=="https:"?"wss://":"ws://")+location.host:null;
+function netConnect(){if(!SRV||!S.user)return;const w=ws=new WebSocket(SRV);w.uid=S.user.id;
+w.onopen=()=>w.send(JSON.stringify({type:"hello",id:S.user.id,name:S.user.name,num:S.user.num}));
+w.onmessage=ev=>{let m;try{m=JSON.parse(ev.data)}catch(e){return}
+if(m.type=="me"&&S.user){wsOk=1;if(m.num!=S.user.num){S.user.num=m.num;const k=known()[kid(S.user.id)];k&&(k.num=m.num);save();pane()}flush()}
+else if(m.type=="msg")incoming(m);else if(m.type=="found"&&pend[m.rid]){pend[m.rid](m);delete pend[m.rid]}};
+w.onclose=()=>{if(ws===w){wsOk=0;ws=null}}}
+setInterval(()=>{if(ws&&(!S.user||ws.uid!=S.user.id)){ws.close();ws=null;wsOk=0}if(S.user&&!ws)netConnect()},1500);
+const live=()=>ws&&ws.readyState==1&&wsOk;
+function netSend(c,x){if(live()){ws.send(JSON.stringify({type:"msg",to:c.num,t:x.t,ts:x.ts}));x.st=2;return 1}x.st=0;return 0}
+function flush(){S.chats.forEach(c=>c.num&&c.msgs.forEach(x=>x.me&&x.st===0&&x.t&&!x.dl&&!x.u&&netSend(c,x)));save();msgs();pane()}
+function lookup(num){return new Promise(res=>{if(!live())return res(null);const rid=Math.random().toString(36).slice(2);pend[rid]=res;ws.send(JSON.stringify({type:"find",num,rid}));setTimeout(()=>{if(pend[rid]){delete pend[rid];res(null)}},4000)})}
+function incoming(m){let c=S.chats.find(x=>x.num&&dg(x.num)==dg(m.from));if(c&&c.blk)return;
+if(!c){c={id:Date.now(),name:m.name||m.from,num:m.from,on:1,unread:0,msgs:[]};S.chats.push(c)}
+c.on=1;c.msgs.push({t:m.t,me:0,ts:m.ts||Date.now()});
+if(cur==c.id){c.unread=0;msgs()}else{c.unread++;if(!muted(c)&&!c.hide)toast("💬 "+c.name+": "+(c.lock?"New message":m.t))}save();pane()}
+
+/* API key popup: app khulte hi, jab tak key save na ho */
+function keyPopup(){if(keyPopup.o&&keyPopup.o.isConnected)return;
+const o=keyPopup.o=modal(`<b>✨ ASF AI key</b><small>ASF AI chalane ke liye apni Gemini API key (AIza...) yahan paste karein. Ye sirf aapke browser me save hoti hai.</small><input id="akp" type="text" value="${esc(S.aik||"")}" placeholder="AIza..." aria-label="API key" autocomplete="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security:disc"><button id="akpp" style="padding:8px;color:var(--ac2)">📋 Clipboard se paste karein</button><div id="ake" role="alert" style="color:#e74c3c;font-size:13px"></div><button class="btn" id="aks2">Save</button><button id="akl" style="padding:8px;color:var(--mu)">Baad me</button>`);
+const done=()=>{const v=$("#akp").value.trim();if(!/^AIza/.test(v))return $("#ake").textContent="Gemini key 'AIza' se shuru hoti hai";S.aik=v;save();o.remove();toast("✓ Key save ho gayi");S.user&&pane()};
+$("#akp").focus();$("#akpp").onclick=()=>pasteKey("#akp");$("#aks2").onclick=done;$("#akp").onkeydown=e=>e.key=="Enter"&&done();$("#akl").onclick=()=>o.remove()}
+setTimeout(keyPopup,300);
+document.addEventListener("click",e=>{if(e.target.closest("#akb"))keyPopup()});
+
+async function pasteKey(id){const el=$(id);try{const v=await navigator.clipboard.readText();if(v){el.value=v.trim();return}}catch(e){}const v=prompt("Apni key yahan paste karein (Ctrl+V):");if(v)el.value=v.trim()}
+</script></body></html>
